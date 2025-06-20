@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bear Switch with Sound</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- GSAP Animation Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      background: #947cb0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .mask {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #947cb0;
+    }
+    .bear__wrap {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-15%, -50%) rotate(5deg) translateY(-75%);
+      width: 100px;
+    }
+    .bear {
+      width: 100%;
+      transform: translateY(100%);
+    }
+    .bear__swear {
+      display: none;
+      position: absolute;
+      left: 105%;
+      top: 0;
+      background: #fff;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .bear__swear:before {
+      content: '';
+      background: #fff;
+      position: absolute;
+      top: 90%;
+      right: 70%;
+      height: 30px;
+      width: 30px;
+      clip-path: polygon(0 100%, 100% 0, 50% 0);
+    }
+    .bear__arm-wrap {
+      position: fixed;
+      height: 30px;
+      width: 90px;
+      top: 50%;
+      left: 50%;
+      transform: translate(0, -50%);
+    }
+    .bear__arm {
+      transform-origin: left;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-35%, -50%) scaleX(1);
+    }
+    .bear__paw {
+      background: #784421;
+      border-radius: 100%;
+      position: fixed;
+      height: 30px;
+      width: 30px;
+      top: 50%;
+      left: 50%;
+      transform-origin: right;
+      transform: translate(80px, -15px) scaleX(0);
+      z-index: 10;
+    }
+    .checkbox {
+      border-radius: 50px;
+      height: 100px;
+      width: 200px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+    }
+    .checkbox input[type="checkbox"] {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      opacity: 0;
+      margin: 0;
+      z-index: 10;
+      cursor: pointer;
+    }
+    .checkbox__bg {
+      background: #aaa;
+      border-radius: 50px;
+      height: 100%;
+      width: 100%;
+    }
+    .checkbox__indicator {
+      background: transparent;
+      height: 100%;
+      width: 50%;
+      border-radius: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .checkbox__indicator::after {
+      content: '';
+      border-radius: 100%;
+      height: 85%;
+      width: 85%;
+      background: #fff;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bear__wrap">
+    <div class="bear__swear" id="swear">#@$%*</div>
+    <svg id="bear" class="bear" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="80" fill="#784421" />
+      <circle cx="75" cy="85" r="10" fill="#000" />
+      <circle cx="125" cy="85" r="10" fill="#000" />
+      <path d="M75 125 Q100 145 125 125" stroke="#000" stroke-width="5" fill="none" />
+    </svg>
+  </div>
+
+  <div class="bear__arm-wrap">
+    <svg id="arm" class="bear__arm" viewBox="0 0 250 100">
+      <path d="M0,50 C80,0 150,100 250,50" fill="#784421" />
+    </svg>
+  </div>
+
+  <div class="bear__paw" id="paw"></div>
+  <div class="mask"></div>
+
+  <div class="checkbox" id="checkbox">
+    <input type="checkbox" />
+    <div class="checkbox__bg" id="bg"></div>
+    <div class="checkbox__indicator" id="indicator"></div>
+  </div>
+
+  <script>
+    const bear = document.getElementById("bear");
+    const paw = document.getElementById("paw");
+    const arm = document.getElementById("arm");
+    const swear = document.getElementById("swear");
+    const checkbox = document.getElementById("checkbox");
+    const bg = document.getElementById("bg");
+    const indicator = document.getElementById("indicator");
+    const checkboxInput = checkbox.querySelector("input");
+
+    // ✅ Sound effects
+    const soundOn = new Audio("https://assets.codepen.io/605876/switch-on.mp3");
+    const soundOff = new Audio("https://assets.codepen.io/605876/switch-off.mp3");
+    const soundGroan = new Audio("https://assets.codepen.io/605876/bear-groan.mp3");
+    soundGroan.playbackRate = 2;
+
+    checkboxInput.addEventListener("change", () => {
+      if (checkboxInput.checked) {
+        soundOn.play(); // ✅ play ON sound
+
+        gsap.to(bg, { backgroundColor: "#2eec71", duration: 0.3 });
+        gsap.to(indicator, { x: "100%", duration: 0.3 });
+        gsap.to(bear, { y: "0%", duration: 0.5 });
+        gsap.to(paw, { scaleX: 0.8, duration: 0.2 });
+        gsap.to(arm, { scaleX: 0.7, duration: 0.2 });
+
+        setTimeout(() => {
+          gsap.set(swear, { display: "block" });
+          soundGroan.play(); // ✅ play bear groan
+        }, 500);
+
+        setTimeout(() => {
+          gsap.set(swear, { display: "none" });
+          gsap.to(bear, { y: "100%", duration: 0.5 });
+          gsap.to(paw, { scaleX: 0, duration: 0.2 });
+          gsap.to(arm, { scaleX: 1, duration: 0.2 });
+          gsap.to(bg, { backgroundColor: "#aaa", duration: 0.3 });
+          gsap.to(indicator, { x: "0%", duration: 0.3 });
+
+          soundOff.play(); // ✅ play OFF sound
+          checkboxInput.checked = false;
+        }, 2000);
+      }
+    });
+  </script>
+
+</body>
+</html>
